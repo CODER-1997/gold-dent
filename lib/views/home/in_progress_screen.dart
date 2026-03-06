@@ -709,56 +709,6 @@ class InProgressScreen extends StatelessWidget {
 
 
 
-Widget _buildModernPatientCard({
-  required String name,
-  required String phone,
-  required List services,
-  required String time,
-  required double debt,
-  required BuildContext context,
-  required Map<String, dynamic> order,
-  required int serviceCount,
-  required VoidCallback onSmsTap,
-}) {
-  // Bemor holatini aniqlash
-  final patientStatus = _getPatientStatus(order, time);
-
-  return Container(
-    margin: const EdgeInsets.only(bottom: 16),
-    decoration: _cardDecoration(patientStatus),
-    child: Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          // 1. Bemor haqida asosiy ma'lumotlar
-          _buildPatientHeader(
-            name: name,
-            phone: phone,
-            status: patientStatus,
-          ),
-
-          const SizedBox(height: 18),
-
-          // 2. Xizmat va vaqt ma'lumotlari
-          _buildServiceInfo(
-            serviceCount: serviceCount,
-            time: time,
-            status: patientStatus,
-          ),
-
-          const SizedBox(height: 16),
-
-          // 3. SMS holati va tugmasi
-          _buildSmsStatus(
-            status: patientStatus,
-            order: order,
-            onTap: onSmsTap,
-          ),
-        ],
-      ),
-    ),
-  );
-}
 
 // ============ KICHIK YORDAMCHI FUNKSIYALAR ============
 

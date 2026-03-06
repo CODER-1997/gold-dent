@@ -5,8 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:gold_dent/views/home/main_screen.dart';
 import 'package:permission_handler/permission_handler.dart'; // Import qilingan
-import 'package:gold_dent/views/home/home_screen.dart';
-import 'package:gold_dent/views/initial_screen/intro_screen.dart';
+ import 'package:gold_dent/views/initial_screen/intro_screen.dart';
 import 'firebase_options.dart';
 import 'package:intl/date_symbol_data_local.dart';
 void main() async {

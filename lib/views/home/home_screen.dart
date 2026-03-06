@@ -1,5 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
+ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -502,9 +501,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  void _showSuccessAnimation() {
-    Get.dialog(Dialog(backgroundColor: Colors.transparent, child: Lottie.asset('assets/lottie/successfully_done.json', repeat: false, onLoaded: (comp) => Future.delayed(const Duration(milliseconds: 1500), () => Get.back()))));
-  }
+
 }
 
 // --- ALOHIDA SAHIFA: BEMOR YARATISH VA TAHRIRLASH ---
