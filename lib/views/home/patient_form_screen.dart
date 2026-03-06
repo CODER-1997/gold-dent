@@ -25,6 +25,8 @@ class _PatientFormScreenState extends State<PatientFormScreen> {
   @override
   void initState() {
     super.initState();
+    totalCtrl.addListener(() => setState(() {}));
+    paidCtrl.addListener(() => setState(() {}));
     _initData();
   }
 
@@ -50,60 +52,859 @@ class _PatientFormScreenState extends State<PatientFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7),
+      backgroundColor: const Color(0xFFF8F9FF), // Yumshoq fon rangi
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        leading: IconButton(
+        leading: Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF0F3FF),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: IconButton(
             onPressed: () => Get.back(),
             icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                color: Colors.black, size: 20)),
-        title: Text(widget.doc == null ? "Yangi Bemor" : "Tahrirlash",
-            style: const TextStyle(
-                color: Colors.black, fontWeight: FontWeight.w900, fontSize: 20)),
+                color: Color(0xFF2E3A59), size: 20),
+          ),
+        ),
+        title: Text(
+          widget.doc == null ? "Yangi Bemor" : "Tahrirlash",
+          style: const TextStyle(
+            color: Color(0xFF2E3A59),
+            fontWeight: FontWeight.w800,
+            fontSize: 20,
+            letterSpacing: 0.5,
+          ),
+        ),
+
       ),
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _sectionTitle("BEMOR MA'LUMOTLARI"),
-              const SizedBox(height: 12),
-              _buildField(nameCtrl, "To'liq ism (F.I.SH)", Icons.person_outline_rounded,
-                  Colors.blue),
-              const SizedBox(height: 16),
-              _buildField(phoneCtrl, "Telefon raqami", Icons.phone_android_rounded,
-                  Colors.green,
-                  keyboardType: TextInputType.phone,
-                  inputFormatters: [UzbekPhoneInputFormatter()]),
+              // Bemor ma'lumotlari kartasi
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.blue.withOpacity(0.05),
+                      blurRadius: 20,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEEF2FF),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(Icons.person_outline_rounded,
+                              color: Color(0xFF4F5B7A), size: 20),
+                        ),
+                        const SizedBox(width: 12),
+                        const Text(
+                          "BEMOR MA'LUMOTLARI",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF4F5B7A),
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    _buildField(
+                      nameCtrl,
+                      "To'liq ism (F.I.O)",
+                      Icons.person_outline_rounded,
+                      isRequired: true,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildField(
+                      phoneCtrl,
+                      "Telefon raqami",
+                      Icons.phone_android_rounded,
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [UzbekPhoneInputFormatter()],
+                      isRequired: true,
+                    ),
+                  ],
+                ),
+              ),
 
-              const SizedBox(height: 32),
-              _sectionTitle("XIZMATLAR"),
-              const SizedBox(height: 12),
-              _servicePickerButton(context),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
-              // TANLANGAN XIZMATLAR BLOKI
-              _selectedServicesList(),
+              // Xizmatlar kartasi
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.blue.withOpacity(0.05),
+                      blurRadius: 20,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE6F7FF),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(Icons.medical_services_outlined,
+                                  color: Color(0xFF0077B6), size: 20),
+                            ),
+                            const SizedBox(width: 12),
+                            const Text(
+                              "XIZMATLAR",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF4F5B7A),
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE6F7FF),
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: Obx(() => Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            child: Text(
+                              "${controller.selectedServices.length} ta",
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF0077B6),
+                              ),
+                            ),
+                          )),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
 
-              const SizedBox(height: 32),
-              _sectionTitle("KASSA VA TO'LOV"),
-              const SizedBox(height: 12),
-              _buildField(totalCtrl, "Umumiy summa", Icons.monetization_on_outlined,
-                  Colors.orange,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [ThousandsSeparatorInputFormatter()]),
+                    // Tanlangan xizmatlar
+                    Obx(() => controller.selectedServices.isEmpty
+                        ? _emptyServiceInfo()
+                        : ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: controller.selectedServices.length,
+                      separatorBuilder: (context, index) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        var s = controller.selectedServices[index];
+                        return _buildServiceCard(s, index);
+                      },
+                    )),
+
+                    const SizedBox(height: 16),
+
+                    // Xizmat qo'shish tugmasi
+                    _servicePickerButton(),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Kassa va to'lov kartasi
+              _buildPaymentSection(),
+
+              const SizedBox(height: 30),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: SizedBox(
+          width: double.infinity-32,
+          height: 62,
+          child: Obx(() => GestureDetector(
+            onTap: controller.isLoading.value ? null : _handleSave,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xFF2563EB),
+                    Color(0xFF3B82F6),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.35),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
+                  )
+                ],
+              ),
+              child: Center(
+                child: controller.isLoading.value
+                    ? const CupertinoActivityIndicator(color: Colors.white)
+                    : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.check_circle_outline,
+                        color: Colors.white, size: 22),
+                    SizedBox(width: 10),
+                    Text(
+                      "SAQLASH",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          )),
+        ),
+      ) ,
+    );
+  }
+
+  Widget _buildPaymentSection() {
+    // Qiymatlarni raqamga o'tkazish (Formatlashdan tozalash)
+    double total = double.tryParse(totalCtrl.text.replaceAll(' ', '')) ?? 0;
+    double paid = double.tryParse(paidCtrl.text.replaceAll(' ', '')) ?? 0;
+    double debt = total - paid;
+    bool isDebt = debt > 0;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader(
+              Icons.account_balance_wallet_outlined,
+              "TO'LOV MA'LUMOTLARI",
+              const Color(0xFFFFF1E6),
+              const Color(0xFFE65C4B)
+          ),
+          const SizedBox(height: 20),
+
+          // Umumiy summa - formatlash va faqat raqam bilan
+          _buildField(
+            totalCtrl,
+            "Umumiy summa",
+            Icons.monetization_on_outlined,
+            isRequired: true,
+            keyboardType: TextInputType.number, // Faqat raqamli klaviatura
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly, // Faqat raqam kiritish
+              ThousandsSeparatorInputFormatter(), // Probellar bilan formatlash
+            ],
+          ),
+          const SizedBox(height: 16),
+
+          // To'langan summa (Avans) - formatlash va faqat raqam bilan
+          _buildField(
+            paidCtrl,
+            "To'langan summa",
+            Icons.payment_outlined,
+            isRequired: false,
+            keyboardType: TextInputType.number, // Faqat raqamli klaviatura
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly, // Faqat raqam kiritish
+              ThousandsSeparatorInputFormatter(), // Probellar bilan formatlash
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Qarzdorlik indikatori
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isDebt ? const Color(0xFFFFF1E6).withOpacity(0.5) : const Color(0xFFE8F5E9).withOpacity(0.5),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: isDebt ? const Color(0xFFFFB74D).withOpacity(0.3) : const Color(0xFF81C784).withOpacity(0.3),
+                width: 1.5,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      isDebt ? Icons.warning_amber_rounded : Icons.check_circle_outline_rounded,
+                      color: isDebt ? const Color(0xFFFF6B35) : const Color(0xFF2E7D32),
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      isDebt ? "Qarzdorlik" : "To'liq to'lov",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: isDebt ? const Color(0xFFFF6B35) : const Color(0xFF2E7D32),
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  "${NumberFormat("#,###").format(debt)} so'm",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    color: isDebt ? const Color(0xFFFF6B35) : const Color(0xFF2E7D32),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(IconData icon, String title, Color bgColor, Color iconColor) {
+    return Row(
+      children: [
+        Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(12)),
+            child: Icon(icon, color: iconColor, size: 20)
+        ),
+        const SizedBox(width: 12),
+        Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFF4F5B7A), letterSpacing: 0.5)),
+      ],
+    );
+  }
+
+
+
+
+
+
+  Widget _buildField(
+      TextEditingController ctrl,
+      String hint,
+      IconData icon, {
+        TextInputType keyboardType = TextInputType.text,
+        List<TextInputFormatter>? inputFormatters,
+        bool isRequired = true,
+      }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (isRequired)
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 6),
+            child: Text(
+              hint,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF8E9AAE),
+              ),
+            ),
+          ),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.blue.withOpacity(0.02),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: TextFormField(
+            controller: ctrl,
+            keyboardType: keyboardType,
+            inputFormatters: inputFormatters,
+            validator: isRequired ? (value) {
+              if (value == null || value.trim().isEmpty) {
+                return "Maydonni to'ldiring";
+              }
+              return null;
+            } : null, // Validator kerak bo'lmaganda null
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+              color: Color(0xFF2E3A59),
+            ),
+            decoration: InputDecoration(
+              prefixIcon: Container(
+                margin: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0F3FF),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: const Color(0xFF4F5B7A), size: 20),
+              ),
+              hintText: hint,
+              hintStyle: TextStyle(
+                color: Colors.grey.shade400,
+                fontWeight: FontWeight.w500,
+                fontSize: 14,
+              ),
+              filled: true,
+              fillColor: Colors.white,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: Colors.grey.shade200, width: 1.5),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: const Color(0xFF4F5B7A), width: 2),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Color(0xFFE65C4B), width: 1.5),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Color(0xFFE65C4B), width: 2),
+              ),
+              contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+              errorStyle: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFFE65C4B),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // To'lov input maydoni (maxsus dizayn)
+  Widget _buildPaymentField(
+      TextEditingController ctrl,
+      String hint,
+      IconData icon, {
+        required Color color,
+        bool isRequired = true,
+      }) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withOpacity(0.2), width: 1),
+      ),
+      child: TextFormField(
+        controller: ctrl,
+        keyboardType: TextInputType.number,
+        inputFormatters: [ThousandsSeparatorInputFormatter()],
+        validator: isRequired ? (value) {
+          if (value == null || value.trim().isEmpty) {
+            return "Maydonni to'ldiring";
+          }
+          return null;
+        } : null, // Validator kerak bo'lmaganda null
+        style: const TextStyle(
+          fontWeight: FontWeight.w700,
+          fontSize: 18,
+          color: Color(0xFF2E3A59),
+        ),
+        decoration: InputDecoration(
+          prefixIcon: Container(
+            margin: const EdgeInsets.all(12),
+            child: Icon(icon, color: color, size: 22),
+          ),
+          hintText: hint,
+          hintStyle: TextStyle(
+            color: Colors.grey.shade400,
+            fontWeight: FontWeight.w500,
+          ),
+          filled: true,
+          fillColor: Colors.white,
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: color.withOpacity(0.2), width: 1),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: color, width: 2),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: Color(0xFFE65C4B), width: 1.5),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: Color(0xFFE65C4B), width: 2),
+          ),
+          contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+          suffixText: "so'm",
+          suffixStyle: TextStyle(
+            color: Colors.grey.shade500,
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
+        ),
+        onChanged: (_) => controller.calculateTotal(totalCtrl),
+      ),
+    );
+  }
+
+  // Xizmat kartasi (tish xaritasisiz)
+  Widget _buildServiceCard(Map<String, dynamic> service, int index) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8F9FF),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE9ECF5), width: 1),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.blue.withOpacity(0.05),
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.medical_services_outlined,
+                color: const Color(0xFF0077B6),
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    service['name'],
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                      color: Color(0xFF2E3A59),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(Icons.monetization_on_outlined,
+                          size: 14, color: Colors.grey.shade500),
+                      const SizedBox(width: 4),
+                      Text(
+                        NumberFormat("#,###").format(service['price']),
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            _buildQuantityControl(service, index),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Miqdor boshqaruvi
+  Widget _buildQuantityControl(Map<String, dynamic> service, int index) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: const Color(0xFFE9ECF5), width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildQuantityButton(
+            icon: Icons.remove_rounded,
+            onTap: () {
+              if (service['quantity'] > 1) {
+                var item = Map<String, dynamic>.from(controller.selectedServices[index]);
+                item['quantity']--;
+                controller.selectedServices[index] = item;
+              } else {
+                controller.selectedServices.removeAt(index);
+              }
+              controller.selectedServices.refresh();
+              controller.calculateTotal(totalCtrl);
+            },
+            color: const Color(0xFFE65C4B),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Text(
+              "${service['quantity']}",
+              style: const TextStyle(
+                fontWeight: FontWeight.w800,
+                fontSize: 16,
+                color: Color(0xFF2E3A59),
+              ),
+            ),
+          ),
+          _buildQuantityButton(
+            icon: Icons.add_rounded,
+            onTap: () {
+              var item = Map<String, dynamic>.from(controller.selectedServices[index]);
+              item['quantity']++;
+              controller.selectedServices[index] = item;
+              controller.selectedServices.refresh();
+              controller.calculateTotal(totalCtrl);
+            },
+            color: const Color(0xFF2E7D32),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuantityButton({
+    required IconData icon,
+    required VoidCallback onTap,
+    required Color color,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Icon(icon, size: 18, color: color),
+      ),
+    );
+  }
+
+  // Xizmat qo'shish tugmasi
+  Widget _servicePickerButton() {
+    return InkWell(
+      onTap: () => _showServicesPicker(),
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE6F7FF),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFB8E2F2), width: 1.5),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.add, color: Color(0xFF0077B6), size: 20),
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              "XIZMAT QO'SHISH",
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF0077B6),
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Bo'sh xizmatlar uchun
+  Widget _emptyServiceInfo() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 40),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8F9FF),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE9ECF5), width: 1.5),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.medical_services_outlined,
+              size: 40,
+              color: Colors.grey.shade400,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            "Xizmatlar qo'shilmagan",
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade500,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "Xizmat qo'shish uchun pastdagi tugmani bosing",
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade400,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+ // Xizmatlar picker (tish xaritasi olib tashlangan)
+  Future<DateTime?> _pickNextVisitDate() async {
+    return await Get.dialog<DateTime>(
+      Dialog(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        child: Container(
+          width: Get.width * 0.85,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // ICON
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE0F2FE),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.calendar_month_rounded, color: Color(0xFF2E5BFF), size: 40),
+              ),
               const SizedBox(height: 16),
-              _buildField(paidCtrl, "To'langan (Avans)",
-                  Icons.account_balance_wallet_outlined, Colors.teal,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [ThousandsSeparatorInputFormatter()]),
-              const SizedBox(height: 40),
-              _saveButton(),
-              const SizedBox(height: 40),
+              const Text(
+                "Keyingi ko'rik",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+              ),
+              const SizedBox(height: 18),
+
+              // --- GRIDVIEW ---
+              GridView.count(
+                shrinkWrap: true,
+                crossAxisCount: 2,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: 2.2,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  _quickDateBtn("Ertaga", 1, const Color(0xFF00C48C)),
+                  _quickDateBtn("Indinga", 2, const Color(0xFF00C48C)),
+                  _quickDateBtn("3 kundan keyin", 3, const Color(0xFF00C48C)),
+                  _quickDateBtn("5 kundan keyin", 5, const Color(0xFF00C48C)),
+                  _quickDateBtn("7 kundan keyin", 7, const Color(0xFF00C48C)),
+                  // Kerak emas tugmasi ham Grid ichida
+                  ElevatedButton(
+                    onPressed: () => Get.back(result: null),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFF1F5F9),
+                      foregroundColor: const Color(0xFF64748B),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    child: const Text("Shart emas", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12)),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              // Calendar
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.date_range),
+                  label: const Text("Kalendarni ochish"),
+                  onPressed: () async {
+                    DateTime? date = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now().add(const Duration(days: 1)),
+                      firstDate: DateTime.now(),
+                      lastDate: DateTime(2100),
+                    );
+                    if (date != null) Get.back(result: date);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2E5BFF),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -111,280 +912,251 @@ class _PatientFormScreenState extends State<PatientFormScreen> {
     );
   }
 
-  // --- SAQLASH FUNKSIYASI ---
+  Widget _quickDateBtn(String title, int days, Color color) {
+    return ElevatedButton(
+      onPressed: () => Get.back(result: DateTime.now().add(Duration(days: days))),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      ),
+      child: Text(title, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12)),
+    );
+  }
+
   void _handleSave() async {
-    if (_formKey.currentState!.validate()) {
-      controller.isLoading.value = true;
-      double clean(String v) => double.tryParse(v.replaceAll(' ', '')) ?? 0;
+    if (!_formKey.currentState!.validate()) return;
 
-      Map<String, dynamic> data = {
-        'id': widget.doc?['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
-        'patientName': nameCtrl.text.trim(),
-        'phone': phoneCtrl.text,
-        'services': List.from(controller.selectedServices),
-        'totalPrice': clean(totalCtrl.text),
-        'paidAmount': clean(paidCtrl.text),
-        'debtAmount': clean(totalCtrl.text) - clean(paidCtrl.text),
-        'nextVisit': DateFormat('dd.MM.yyyy').format(DateTime.now()),
-        'time': widget.doc?['time'] ?? DateTime.now().toIso8601String()
-      };
+    // Dialog natijasini kutamiz
+    DateTime? pickedDate = await _pickNextVisitDate();
 
-      try {
-        if (widget.doc == null) {
-          await controller.addOrder(data);
-        } else {
-          await controller.updateOrder(widget.doc!, data);
-        }
-        controller.isLoading.value = false;
-        Get.back();
-        Get.snackbar("Muvaffaqiyatli", "Ma'lumotlar saqlandi",
-            backgroundColor: Colors.green,
-            colorText: Colors.white,
-            snackPosition: SnackPosition.BOTTOM,
-            margin: const EdgeInsets.all(15),
-            borderRadius: 15);
-      } catch (e) {
-        controller.isLoading.value = false;
-        Get.snackbar("Xato", "Xatolik yuz berdi", backgroundColor: Colors.red, colorText: Colors.white);
+    // DIALOGDAN KEYIN ISHLAYDI:
+    controller.isLoading.value = true;
+
+    double clean(String v) => double.tryParse(v.replaceAll(' ', '')) ?? 0;
+    String name = nameCtrl.text.trim();
+
+    Map<String, dynamic> data = {
+      'id': widget.doc?['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      'patientName': name,
+      'phone': phoneCtrl.text,
+      'services': List.from(controller.selectedServices),
+      'totalPrice': clean(totalCtrl.text),
+      'paidAmount': clean(paidCtrl.text),
+      'debtAmount': clean(totalCtrl.text) - clean(paidCtrl.text),
+      'nextVisit': pickedDate == null ? null : DateFormat('dd.MM.yyyy').format(pickedDate),
+      'time': widget.doc?['time'] ?? DateTime.now().toIso8601String()
+    };
+
+    try {
+      if (widget.doc == null) {
+        await controller.addOrder(data);
+      } else {
+        await controller.updateOrder(widget.doc!, data);
       }
+
+      controller.isLoading.value = false;
+      Get.back();
+
+      // Agar sana tanlangan bo'lsa snackbarda ko'rsatamiz
+      String msg = pickedDate == null
+          ? "Ma'lumot saqlandi"
+          : "Keyingi ko'rik: ${DateFormat('dd.MM.yyyy').format(pickedDate)}";
+
+      Get.snackbar(
+        "Muvaffaqiyatli",
+        msg,
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: const Color(0xFF00C48C),
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      controller.isLoading.value = false;
+      Get.snackbar("Xato", "Xatolik: $e", backgroundColor: Colors.red, colorText: Colors.white);
     }
   }
 
-  // --- PREMIUM INPUT WIDGET ---
-  Widget _buildField(TextEditingController ctrl, String hint, IconData icon, Color iconColor,
-      {TextInputType keyboardType = TextInputType.text,
-        List<TextInputFormatter>? inputFormatters}) {
-    return TextFormField(
-      controller: ctrl,
-      keyboardType: keyboardType,
-      inputFormatters: inputFormatters,
-      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
-      decoration: InputDecoration(
-        prefixIcon: Icon(icon, color: iconColor, size: 22),
-        hintText: hint,
-        hintStyle: TextStyle(color: Colors.grey.shade400, fontWeight: FontWeight.w500),
-        filled: true,
-        fillColor: Colors.white,
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: Colors.grey.shade300, width: 1.2),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: BorderSide(color: iconColor, width: 2),
-        ),
-        contentPadding: const EdgeInsets.all(18),
-      ),
-    );
-  }
 
-  // --- XIZMATLAR RO'YXATI KONTEYNERI ---
-  Widget _selectedServicesList() {
-    return Obx(() => controller.selectedServices.isEmpty
-        ? _emptyServiceInfo()
-        : Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.blue.withOpacity(0.1), width: 1.5),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 20, offset: const Offset(0, 10))
-        ],
-      ),
-      child: ListView.separated(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: controller.selectedServices.length,
-        separatorBuilder: (context, index) => Divider(color: Colors.grey.shade100, height: 1, indent: 20, endIndent: 20),
-        itemBuilder: (context, index) => _selectedServiceTile(controller.selectedServices[index]),
-      ),
-    ));
-  }
 
-  Widget _selectedServiceTile(Map<String, dynamic> s) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: Colors.green.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
-            child: const Icon(Icons.check_circle_rounded, color: Colors.green, size: 20),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(s['name'], style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14)),
-                const SizedBox(height: 2),
-                Text("${NumberFormat("#,###").format(s['price'])} so'm",
-                    style: TextStyle(color: Colors.green.shade700, fontWeight: FontWeight.w700, fontSize: 12)),
-              ],
-            ),
-          ),
-          _qtyController(s),
-        ],
-      ),
-    );
-  }
 
-  Widget _qtyController(Map<String, dynamic> s) {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(color: const Color(0xFFF2F2F7), borderRadius: BorderRadius.circular(12)),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _qtyActionBtn(
-            icon: Icons.remove_rounded,
-            color: Colors.redAccent,
-            onTap: () {
-              var idx = controller.selectedServices.indexOf(s);
-              if (s['quantity'] > 1) {
-                var item = Map<String, dynamic>.from(controller.selectedServices[idx]);
-                item['quantity']--;
-                controller.selectedServices[idx] = item;
-              } else {
-                controller.selectedServices.removeAt(idx);
-              }
-              controller.selectedServices.refresh();
-              controller.calculateTotal(totalCtrl);
-            },
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Text("${s['quantity']}", style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14)),
-          ),
-          _qtyActionBtn(
-            icon: Icons.add_rounded,
-            color: Colors.blue,
-            onTap: () {
-              var idx = controller.selectedServices.indexOf(s);
-              var item = Map<String, dynamic>.from(controller.selectedServices[idx]);
-              item['quantity']++;
-              controller.selectedServices[idx] = item;
-              controller.selectedServices.refresh();
-              controller.calculateTotal(totalCtrl);
-            },
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _qtyActionBtn({required IconData icon, required Color color, required VoidCallback onTap}) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.all(6),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
-        child: Icon(icon, size: 16, color: color),
-      ),
-    );
-  }
-
-  // --- QOLGAN YORDAMCHI WIDGETLAR ---
-  Widget _saveButton() {
-    return SizedBox(
-      width: double.infinity, height: 60,
-      child: Obx(() => ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.green.shade600,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          elevation: 0,
-        ),
-        onPressed: controller.isLoading.value ? null : _handleSave,
-        child: controller.isLoading.value
-            ? const CupertinoActivityIndicator(color: Colors.white)
-            : const Text("SAQLASH", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 1)),
-      )),
-    );
-  }
-
-  Widget _sectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 8),
-      child: Text(title, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: Colors.blueGrey.shade700, letterSpacing: 1)),
-    );
-  }
-
-  Widget _emptyServiceInfo() {
-    return Container(
-      width: double.infinity, padding: const EdgeInsets.all(30),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade200)),
-      child: const Center(child: Text("Xizmatlar qo'shilmadi", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600))),
-    );
-  }
-
-  Widget _servicePickerButton(BuildContext context) {
-    return InkWell(
-      onTap: () => _showAllServicesPicker(context),
-      borderRadius: BorderRadius.circular(15),
-      child: Container(
-        width: double.infinity, padding: const EdgeInsets.symmetric(vertical: 20),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(colors: [Colors.blue.shade700, Colors.blue.shade400], begin: Alignment.topLeft, end: Alignment.bottomRight),
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [BoxShadow(color: Colors.blue.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 5))],
-        ),
-        child: const Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.add_shopping_cart_rounded, color: Colors.white), SizedBox(width: 12), Text("XIZMATLARNI TANLASH", style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white, fontSize: 14, letterSpacing: 1))]),
-      ),
-    );
-  }
-
-  void _showAllServicesPicker(BuildContext context) {
+  void _showServicesPicker() {
     final searchCtrl = TextEditingController();
     RxString query = "".obs;
+
     Get.bottomSheet(
       isScrollControlled: true,
       Container(
         height: Get.height * 0.85,
-        decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(30))),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        ),
         child: Column(
           children: [
             const SizedBox(height: 12),
-            Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10))),
-            const Padding(padding: EdgeInsets.all(20), child: Text("STOMATOLOGIK XIZMATLAR", style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18))),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: TextField(
-                controller: searchCtrl, onChanged: (v) => query.value = v.toLowerCase(),
-                decoration: InputDecoration(hintText: "Qidirish...", prefixIcon: const Icon(Icons.search, color: Colors.blue), filled: true, fillColor: Colors.grey.shade100, border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none)),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
-            const SizedBox(height: 15),
+            const Padding(
+              padding: EdgeInsets.all(20),
+              child: Text(
+                "STOMATOLOGIK XIZMATLAR",
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 20,
+                  color: Color(0xFF2E3A59),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF8F9FF),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFE9ECF5)),
+                ),
+                child: TextField(
+                  controller: searchCtrl,
+                  onChanged: (v) => query.value = v.toLowerCase(),
+                  decoration: InputDecoration(
+                    hintText: "Xizmat nomini kiriting...",
+                    prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF0077B6)),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.all(16),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance.collection('DentistServices').orderBy('name').snapshots(),
+                stream: FirebaseFirestore.instance
+                    .collection('DentistServices')
+                    .orderBy('name')
+                    .snapshots(),
                 builder: (context, snap) {
-                  if (!snap.hasData) return const Center(child: CupertinoActivityIndicator());
+                  if (!snap.hasData) {
+                    return const Center(
+                      child: CupertinoActivityIndicator(),
+                    );
+                  }
+
                   return Obx(() {
-                    var docs = snap.data!.docs.where((d) => (d.data() as Map)['name'].toString().toLowerCase().contains(query.value)).toList();
+                    var docs = snap.data!.docs
+                        .where((d) => (d.data() as Map)['name']
+                        .toString()
+                        .toLowerCase()
+                        .contains(query.value))
+                        .toList();
+
                     return ListView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       itemCount: docs.length,
                       itemBuilder: (context, i) {
                         var data = docs[i].data() as Map<String, dynamic>;
+
                         return Obx(() {
-                          bool isSelected = controller.selectedServices.any((s) => s['name'] == data['name']);
-                          int count = controller.selectedServices.firstWhereOrNull((s) => s['name'] == data['name'])?['quantity'] ?? 0;
-                          return AnimatedContainer(
-                            duration: const Duration(milliseconds: 200), margin: const EdgeInsets.only(bottom: 10),
-                            decoration: BoxDecoration(color: isSelected ? Colors.blue.shade50 : Colors.white, borderRadius: BorderRadius.circular(15), border: Border.all(color: isSelected ? Colors.blue.shade200 : Colors.grey.shade200)),
+                          bool isSelected = controller.selectedServices
+                              .any((s) => s['name'] == data['name']);
+                          int count = controller.selectedServices
+                              .firstWhereOrNull((s) => s['name'] == data['name'])
+                          ?['quantity'] ?? 0;
+
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            decoration: BoxDecoration(
+                              color: isSelected ? const Color(0xFFE6F7FF) : Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(
+                                color: isSelected
+                                    ? const Color(0xFF0077B6).withOpacity(0.3)
+                                    : const Color(0xFFE9ECF5),
+                                width: 1.5,
+                              ),
+                            ),
                             child: ListTile(
-                              title: Text(data['name'], style: TextStyle(fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700)),
-                              subtitle: Text("${NumberFormat("#,###").format(data['price'])} so'm", style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
-                              trailing: isSelected ? Container(padding: const EdgeInsets.all(8), decoration: const BoxDecoration(color: Colors.blue, shape: BoxShape.circle), child: Text("$count", style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))) : Icon(Icons.add_circle_outline, color: Colors.grey.shade400),
+                              contentPadding: const EdgeInsets.all(12),
+                              leading: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Icon(
+                                  Icons.medical_services_outlined,
+                                  color: isSelected
+                                      ? const Color(0xFF0077B6)
+                                      : Colors.grey.shade500,
+                                  size: 22,
+                                ),
+                              ),
+                              title: Text(
+                                data['name'],
+                                style: TextStyle(
+                                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                                  color: isSelected ? const Color(0xFF0077B6) : const Color(0xFF2E3A59),
+                                  fontSize: 15,
+                                ),
+                              ),
+                              subtitle: Text(
+                                NumberFormat("#,###").format(data['price']),
+                                style: const TextStyle(
+                                  color: Color(0xFF2E7D32),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              trailing: isSelected
+                                  ? Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFF0077B6),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Text(
+                                  "$count",
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              )
+                                  : Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF0F3FF),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.add_rounded,
+                                  color: Color(0xFF4F5B7A),
+                                  size: 18,
+                                ),
+                              ),
                               onTap: () {
-                                var idx = controller.selectedServices.indexWhere((s) => s['name'] == data['name']);
+                                var idx = controller.selectedServices
+                                    .indexWhere((s) => s['name'] == data['name']);
+
                                 if (idx != -1) {
-                                  var item = Map<String, dynamic>.from(controller.selectedServices[idx]);
+                                  var item = Map<String, dynamic>.from(
+                                      controller.selectedServices[idx]);
                                   item['quantity']++;
                                   controller.selectedServices[idx] = item;
                                 } else {
-                                  controller.selectedServices.add({'name': data['name'], 'price': (data['price'] as num).toDouble(), 'quantity': 1});
+                                  controller.selectedServices.add({
+                                    'name': data['name'],
+                                    'price': (data['price'] as num).toDouble(),
+                                    'quantity': 1,
+                                  });
                                 }
                                 controller.selectedServices.refresh();
                                 controller.calculateTotal(totalCtrl);
@@ -398,7 +1170,32 @@ class _PatientFormScreenState extends State<PatientFormScreen> {
                 },
               ),
             ),
-            Padding(padding: const EdgeInsets.all(20), child: SizedBox(width: double.infinity, height: 55, child: ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: Colors.blue.shade700, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15))), onPressed: () => Get.back(), child: const Text("YAKUNLASH", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900))))),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0077B6),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 0,
+                  ),
+                  onPressed: () => Get.back(),
+                  child: const Text(
+                    "TASDIQLASH",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -406,7 +1203,7 @@ class _PatientFormScreenState extends State<PatientFormScreen> {
   }
 }
 
-// FORMATTERS
+// UzbekPhoneInputFormatter (o'zgarishsiz)
 class UzbekPhoneInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(TextEditingValue old, TextEditingValue newVal) {
@@ -421,10 +1218,14 @@ class UzbekPhoneInputFormatter extends TextInputFormatter {
       if (i == 8 || i == 10) buffer.write('-');
       if (i < 12) buffer.write(digits[i]);
     }
-    return TextEditingValue(text: buffer.toString(), selection: TextSelection.collapsed(offset: buffer.toString().length));
+    return TextEditingValue(
+      text: buffer.toString(),
+      selection: TextSelection.collapsed(offset: buffer.toString().length),
+    );
   }
 }
 
+// ThousandsSeparatorInputFormatter (o'zgarishsiz)
 class ThousandsSeparatorInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(TextEditingValue old, TextEditingValue newVal) {
@@ -435,6 +1236,9 @@ class ThousandsSeparatorInputFormatter extends TextInputFormatter {
       if (i > 0 && (clean.length - i) % 3 == 0) buffer.write(' ');
       buffer.write(clean[i]);
     }
-    return TextEditingValue(text: buffer.toString(), selection: TextSelection.collapsed(offset: buffer.toString().length));
+    return TextEditingValue(
+      text: buffer.toString(),
+      selection: TextSelection.collapsed(offset: buffer.toString().length),
+    );
   }
 }

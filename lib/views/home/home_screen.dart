@@ -25,6 +25,45 @@ class HomeScreen extends StatelessWidget {
         centerTitle: false,
         title: const Text("Gold Dent",
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.w900, fontSize: 24)),
+        actions: [
+          // BUGUNGI NAVBATDAGILAR UCHUN OGOHLANTIRISH
+          Obx(() {
+            // Bugungi sanani formatlash
+            String today = DateFormat('dd.MM.yyyy').format(DateTime.now());
+
+            // Faqat nextVisit bugunga to'g'ri keladiganlarni sanash
+            int appointmentsCount = controller.todayOrders.where((order) =>
+            order['nextVisit'] == today).length;
+
+            if (appointmentsCount == 0) return const SizedBox();
+
+            return Container(
+              height: 64,
+              margin: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, ),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.red.shade200, width: 1),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.notifications_active_rounded,
+                      color: Colors.red.shade700, size: 18),
+                  const SizedBox(width: 6),
+                  Text(
+                    "$appointmentsCount ta navbat",
+                    style: TextStyle(
+                      color: Colors.red.shade900,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
       ),
 
       floatingActionButton: Obx(() => controller.isWorkStarted.value
@@ -88,53 +127,227 @@ class HomeScreen extends StatelessWidget {
     Get.bottomSheet(
       isScrollControlled: true,
       Container(
-        height: Get.height * 0.8,
-        decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(35))),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        height: Get.height * 0.85,
+        decoration: const BoxDecoration(
+          color: Color(0xFFF8F9FB),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(35)),
+        ),
         child: Column(
           children: [
-            Container(width: 50, height: 5, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10))),
-            const SizedBox(height: 25),
-            Row(
-              children: [
-                CircleAvatar(radius: 35, backgroundColor: const Color(0xFF007AFF).withOpacity(0.1), child: Text(order['patientName']?[0].toUpperCase() ?? "?", style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Color(0xFF007AFF)))),
-                const SizedBox(width: 16),
-                Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(order['patientName'] ?? "Noma'lum", style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900)), Text(order['phone'] ?? "-", style: const TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.w600))])),
-              ],
-            ),
-            const SizedBox(height: 30),
-            Expanded(
-              child: ListView.builder(
-                itemCount: (order['services'] as List).length,
-                itemBuilder: (context, i) {
-                  final s = order['services'][i];
-                  return _detailServiceItem(s);
-                },
+            const SizedBox(height: 12),
+            // --- TOP HEADER LINE AND CLOSE BUTTON ---
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const SizedBox(width: 40), // Balans uchun bo'sh joy
+                  Container(width: 50, height: 5, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(10))),
+                  IconButton(
+                    onPressed: () => Get.back(),
+                    icon: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(color: Colors.grey.withOpacity(0.1), shape: BoxShape.circle),
+                      child: const Icon(Icons.close_rounded, color: Colors.red, size: 33),
+                    ),
+                  ),
+                ],
               ),
             ),
-            _bottomTotalBlock(order['totalPrice']),
+
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                children: [
+                  // --- PROFILE HEADER ---
+                  _buildOrderInfoProfile(order),
+                  const SizedBox(height: 24),
+
+                  // --- FINANCIAL SUMMARY ---
+                  _buildFinanceRow(order),
+                  const SizedBox(height: 32),
+
+                  // --- SERVICES SECTION ---
+                  const Text("AMALGA OSHIRILGAN MUOLAJALAR",
+                      style: TextStyle(fontWeight: FontWeight.w900, color: Colors.blueGrey, fontSize: 11, letterSpacing: 1.1)),
+                  const SizedBox(height: 12),
+                  ... (order['services'] as List).map((s) => _buildEnhancedServiceCard(s)).toList(),
+
+                  const SizedBox(height: 24),
+                  if (order['time'] != null)
+                    Center(child: Text("Qabul vaqti: ${DateFormat('HH:mm, dd.MM.yyyy').format(DateTime.parse(order['time']))}",
+                        style: const TextStyle(color: Colors.grey, fontSize: 12))),
+                ],
+              ),
+            ),
+
+            // --- BOTTOM ACTIONS ---
+            _buildOrderBottomActions(order),
+          ],
+        ),
+      ),
+    );
+  }
+  // Bemor profili bloki
+  Widget _buildOrderInfoProfile(Map<String, dynamic> order) {
+    return Row(
+      children: [
+        Container(
+          width: 70, height: 70,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: [Colors.blue.shade400, Colors.blue.shade700]),
+            borderRadius: BorderRadius.circular(22),
+          ),
+          child: Center(child: Text(order['patientName']?[0].toUpperCase() ?? "?",
+              style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w900, color: Colors.white))),
+        ),
+        const SizedBox(width: 18),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(order['patientName'] ?? "Noma'lum",
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: -0.5)),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  const Icon(Icons.phone_iphone_rounded, size: 14, color: Colors.grey),
+                  const SizedBox(width: 4),
+                  Text(order['phone'] ?? "-", style: const TextStyle(fontSize: 14, color: Colors.grey, fontWeight: FontWeight.w600)),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // To'lov ma'lumotlari (Paid / Debt)
+  Widget _buildFinanceRow(Map<String, dynamic> order) {
+    return Row(
+      children: [
+        _miniFinanceCard("TO'LANDI", "${NumberFormat("#,###").format(order['paidAmount'])}", Colors.green),
+        const SizedBox(width: 12),
+        _miniFinanceCard("QARZDORLIK", "${NumberFormat("#,###").format(order['debtAmount'])}", Colors.redAccent),
+      ],
+    );
+  }
+
+  Widget _miniFinanceCard(String label, String value, Color color) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(color: color.withOpacity(0.06), borderRadius: BorderRadius.circular(20), border: Border.all(color: color.withOpacity(0.1))),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: TextStyle(color: color, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
+            const SizedBox(height: 4),
+            Text("$value so'm", style: TextStyle(color: color, fontSize: 16, fontWeight: FontWeight.w900)),
           ],
         ),
       ),
     );
   }
 
-  Widget _detailServiceItem(Map<String, dynamic> s) {
+  // Xizmat kartasi (Tishlar bilan)
+  Widget _buildEnhancedServiceCard(Map<String, dynamic> s) {
+    List<dynamic> teeth = s['teeth'] ?? [];
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(gradient: const LinearGradient(colors: [Color(0xFFF2F2F7), Colors.white]), borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.withOpacity(0.1))),
-      child: Row(children: [const Icon(Icons.done_all_rounded, color: Colors.green, size: 20), const SizedBox(width: 16), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(s['name'], style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15)), Text("${s['quantity']} ta", style: const TextStyle(color: Colors.grey, fontSize: 12))])), Text("${NumberFormat("#,###").format(s['price'] * s['quantity'])} so'm", style: const TextStyle(fontWeight: FontWeight.w900))]),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(child: Text(s['name'], style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16))),
+              Text("${NumberFormat("#,###").format(s['price'])} so'm", style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.blue)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(10)),
+                child: Text("Miqdor: ${s['quantity']} ta", style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blueGrey)),
+              ),
+              const SizedBox(width: 8),
+              if (teeth.isNotEmpty)
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: teeth.map((t) => Container(
+                        margin: const EdgeInsets.only(right: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.blue.shade100)),
+                        child: Text("$t-tish", style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.blue)),
+                      )).toList(),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _bottomTotalBlock(dynamic total) {
+  // Pastki Jami summa va tugmalar
+  Widget _buildOrderBottomActions(Map<String, dynamic> order) {
     return Container(
       padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(color: const Color(0xFF1C1C1E), borderRadius: BorderRadius.circular(28)),
-      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [const Text("JAMI SUMMA", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)), Text("${NumberFormat("#,###").format(total)} so'm", style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900))]),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 20, offset: Offset(0, -5))],
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text("UMUMIY SUMMA", style: TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.w900)),
+                Text("${NumberFormat("#,###").format(order['totalPrice'])} so'm",
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.black)),
+              ],
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF007AFF),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              elevation: 0,
+            ),
+            onPressed: () {
+              Get.back();
+              Get.to(() => PatientFormScreen(doc: order));
+            },
+            child: const Row(
+              children: [
+                Icon(Icons.edit_document, color: Colors.white, size: 18),
+                SizedBox(width: 8),
+                Text("TAHRIRLASH", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 13)),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
+
 
   void _showOrderActions(BuildContext context, Map<String, dynamic> order, HomeController controller) {
     Get.bottomSheet(Container(padding: const EdgeInsets.all(24), decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(32))), child: Column(mainAxisSize: MainAxisSize.min, children: [Container(width: 40, height: 4, margin: const EdgeInsets.only(bottom: 24), decoration: BoxDecoration(color: Colors.grey.shade200, borderRadius: BorderRadius.circular(10))), _buildActionItem(label: "Ma'lumotlarni tahrirlash", icon: Icons.edit_rounded, color: const Color(0xFF007AFF), onTap: () { Get.back(); Get.to(() => PatientFormScreen(doc: order)); }), const SizedBox(height: 12), _buildActionItem(label: "Orderni o'chirish", icon: Icons.delete_outline_rounded, color: Colors.redAccent, onTap: () { Get.back(); _confirmDelete(order, controller); })])));
@@ -162,7 +375,131 @@ class HomeScreen extends StatelessWidget {
   }
 
   void _confirmDelete(Map<String, dynamic> order, HomeController controller) {
-    Get.dialog(AlertDialog(title: const Text("O'chirish?"), content: Text("${order['patientName']} ma'lumotlari o'chadi."), actions: [TextButton(onPressed: () => Get.back(), child: const Text("BEKOR")), ElevatedButton(style: ElevatedButton.styleFrom(backgroundColor: Colors.red), onPressed: () { controller.deleteOrder(order); Get.back(); }, child: const Text("O'CHIRISH"))]));
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+        elevation: 0,
+        backgroundColor: Colors.white,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Yuqoridagi ogohlantirish ikonkasi
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.delete_sweep_rounded,
+                  color: Colors.redAccent,
+                  size: 38,
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Sarlavha
+              const Text(
+                "Orderni o'chirish",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Matn
+              RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  style: const TextStyle(color: Colors.grey, fontSize: 14, height: 1.5),
+                  children: [
+                    const TextSpan(text: "Haqiqatdan ham "),
+                    TextSpan(
+                      text: "${order['patientName']}",
+                      style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                    ),
+                    const TextSpan(text: "ga tegishli barcha buyurtma ma'lumotlarini o'chirib tashlamoqchimisiz?"),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              // Tugmalar bloki
+              Row(
+                children: [
+                  // Bekor qilish tugmasi
+                  Expanded(
+                    child: SizedBox(
+                      height: 54,
+                      child: TextButton(
+                        onPressed: () => Get.back(),
+                        style: TextButton.styleFrom(
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                        child: const Text(
+                          "BEKOR QILISH",
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+
+                  // Tasdiqlash tugmasi
+                  Expanded(
+                    child: SizedBox(
+                      height: 54,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          controller.deleteOrder(order);
+                          Get.back();
+                          // Success xabarnomasi uchun:
+                          Get.snackbar(
+                            "O'chirildi",
+                            "Ma'lumotlar muvaffaqiyatli tozalandi",
+                            snackPosition: SnackPosition.BOTTOM,
+                            backgroundColor: Colors.black87,
+                            colorText: Colors.white,
+                            margin: const EdgeInsets.all(15),
+                            borderRadius: 15,
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.redAccent,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                        label: const Text(
+                          "O'CHIRISH",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: true, // Tashqarini bossa yopiladi
+    );
   }
 
   void _showSuccessAnimation() {

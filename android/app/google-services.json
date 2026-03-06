@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "192064790246",
+    "project_id": "golddent-34ef8",
+    "storage_bucket": "golddent-34ef8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:192064790246:android:02bce5f0f074c533b2a527",
+        "android_client_info": {
+          "package_name": "com.example.gold_dent"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDCABweKkrlFLmCcgbRROSVy81Lt04pkHQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
